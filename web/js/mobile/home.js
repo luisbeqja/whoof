@@ -114,13 +114,12 @@ async function render() {
   const today = latestUsable(metrics);
 
   const connected = strap.state.status === 'connected';
-  const pill = connectionPill();
 
   if (!today) {
     root.innerHTML = `
       <header class="home-head">
         <div><div class="hello">${greeting()}</div><div class="subtitle">Let's see your day</div></div>
-        ${pill}
+        ${headActions()}
       </header>
       <div class="empty-hero">
         <div class="empty-ring">${ring({ value: null, max: 100, color: COLORS.track, size: 220, label: 'Recovery' })}</div>
@@ -135,23 +134,31 @@ async function render() {
 
   const recValid = today.recovery_score != null && today.rmssd_ms != null;
   const rec = recValid ? today.recovery_score : null;
-  const recCol = recoveryColor(rec);
+  // Recovery only becomes meaningful once there are ~3 nights of HRV history to
+  // baseline against (rollup sets hrv_baseline_ms then). Before that, the HRV
+  // and resting-HR components are dropped and the score is driven only by
+  // sleep/strain — misleading — so we show a "building baseline" state rather
+  // than a number.
+  const baselineReady = recValid && today.hrv_baseline_ms != null;
+  const recCol = baselineReady ? recoveryColor(rec) : COLORS.track;
 
-  // training recommendation
+  // training recommendation (only once recovery is trustworthy)
   const strains = metrics.map((m) => m.strain_score).filter((v) => v != null);
   const avgStrain7d = strains.length ? strains.reduce((a, b) => a + b, 0) / strains.length : null;
   const recs = metrics.map((m) => m.recovery_score).filter((v) => v != null);
   const lowStreak = recs.length >= 3 && recs.slice(0, 3).every((r) => r < 33);
   let plan = null;
-  try {
-    plan = dailyPlan({
-      recoveryScore: rec,
-      sleepPerformancePct: today.sleep_minutes ? today.sleep_performance_pct : null,
-      sleepDebtMinutes: today.sleep_minutes ? today.sleep_debt_minutes : null,
-      avgStrain7d,
-      lowStreakDays: lowStreak,
-    });
-  } catch { /* ignore */ }
+  if (baselineReady) {
+    try {
+      plan = dailyPlan({
+        recoveryScore: rec,
+        sleepPerformancePct: today.sleep_minutes ? today.sleep_performance_pct : null,
+        sleepDebtMinutes: today.sleep_minutes ? today.sleep_debt_minutes : null,
+        avgStrain7d,
+        lowStreakDays: lowStreak,
+      });
+    } catch { /* ignore */ }
+  }
 
   const hrvSub = [
     today.rmssd_ms != null ? `HRV ${Math.round(today.rmssd_ms)}ms` : null,
@@ -164,15 +171,20 @@ async function render() {
         <div class="hello">${greeting()}</div>
         <div class="subtitle">${esc(relDate(today.date))}</div>
       </div>
-      ${pill}
+      ${headActions()}
     </header>
 
     <section class="hero-card">
-      ${ring({ value: rec, max: 100, color: recCol, size: 230, stroke: 18, label: 'Recovery', sub: rec == null ? 'wear overnight' : (hrvSub || null) })}
+      ${ring({ value: baselineReady ? rec : null, max: 100, color: recCol, size: 230, stroke: 18, label: 'Recovery',
+               sub: baselineReady ? (hrvSub || null) : (hrvSub || 'wear overnight') })}
       ${plan ? `<div class="plan" style="--plan:${plan.color}">
           <div class="plan-label">${esc(plan.label)}</div>
           <div class="plan-target">Target strain ${plan.strainRange[0]}–${plan.strainRange[1]}</div>
-        </div>` : ''}
+        </div>`
+        : `<div class="plan" style="--plan:#46d8ff">
+          <div class="plan-label">Building your baseline</div>
+          <div class="plan-target">Recovery unlocks after ~3 nights</div>
+        </div>`}
     </section>
 
     <section class="ring-pair">
@@ -208,6 +220,21 @@ async function render() {
   root.querySelector('#home-coach')?.addEventListener('click', () => onOpenChat());
 }
 
+const SYNC_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+
+// Pill + (when connected) a "Sync now" button to re-pull buffered data from the
+// strap's flash on demand. Wrapped in one container so updateLive() can swap
+// the whole thing as the connection state changes.
+function actionsInner() {
+  const sync = strap.state.status === 'connected'
+    ? `<button class="sync-btn" id="home-sync" aria-label="Sync now" title="Sync now">${SYNC_ICON}</button>`
+    : '';
+  return connectionPill() + sync;
+}
+function headActions() {
+  return `<div class="head-actions" id="home-actions">${actionsInner()}</div>`;
+}
+
 function connectionPill() {
   const s = strap.state;
   if (s.status === 'connected') {
@@ -230,17 +257,18 @@ function wirePill() {
   };
   root.querySelector('#home-pill')?.addEventListener('click', handler);
   root.querySelector('#home-connect')?.addEventListener('click', () => strap.connect());
+  root.querySelector('#home-sync')?.addEventListener('click', () => strap.syncNow());
 }
 
 // Update just the live bits (HR, pill) without a full re-render, to keep the
 // rings from flickering while streaming.
 function updateLive() {
   if (!root) return;
-  const pill = root.querySelector('#home-pill');
-  if (pill) {
-    const fresh = document.createElement('div');
-    fresh.innerHTML = connectionPill();
-    pill.replaceWith(fresh.firstElementChild);
+  const actions = root.querySelector('#home-actions');
+  if (actions) {
+    // Re-render pill + sync button so the sync button appears/disappears with
+    // the connection state.
+    actions.innerHTML = actionsInner();
     wirePill();
   }
   // live HR tile (first tile) — only when connected & streaming
