@@ -134,23 +134,31 @@ async function render() {
 
   const recValid = today.recovery_score != null && today.rmssd_ms != null;
   const rec = recValid ? today.recovery_score : null;
-  const recCol = recoveryColor(rec);
+  // Recovery only becomes meaningful once there are ~3 nights of HRV history to
+  // baseline against (rollup sets hrv_baseline_ms then). Before that, the HRV
+  // and resting-HR components are dropped and the score is driven only by
+  // sleep/strain — misleading — so we show a "building baseline" state rather
+  // than a number.
+  const baselineReady = recValid && today.hrv_baseline_ms != null;
+  const recCol = baselineReady ? recoveryColor(rec) : COLORS.track;
 
-  // training recommendation
+  // training recommendation (only once recovery is trustworthy)
   const strains = metrics.map((m) => m.strain_score).filter((v) => v != null);
   const avgStrain7d = strains.length ? strains.reduce((a, b) => a + b, 0) / strains.length : null;
   const recs = metrics.map((m) => m.recovery_score).filter((v) => v != null);
   const lowStreak = recs.length >= 3 && recs.slice(0, 3).every((r) => r < 33);
   let plan = null;
-  try {
-    plan = dailyPlan({
-      recoveryScore: rec,
-      sleepPerformancePct: today.sleep_minutes ? today.sleep_performance_pct : null,
-      sleepDebtMinutes: today.sleep_minutes ? today.sleep_debt_minutes : null,
-      avgStrain7d,
-      lowStreakDays: lowStreak,
-    });
-  } catch { /* ignore */ }
+  if (baselineReady) {
+    try {
+      plan = dailyPlan({
+        recoveryScore: rec,
+        sleepPerformancePct: today.sleep_minutes ? today.sleep_performance_pct : null,
+        sleepDebtMinutes: today.sleep_minutes ? today.sleep_debt_minutes : null,
+        avgStrain7d,
+        lowStreakDays: lowStreak,
+      });
+    } catch { /* ignore */ }
+  }
 
   const hrvSub = [
     today.rmssd_ms != null ? `HRV ${Math.round(today.rmssd_ms)}ms` : null,
@@ -167,11 +175,16 @@ async function render() {
     </header>
 
     <section class="hero-card">
-      ${ring({ value: rec, max: 100, color: recCol, size: 230, stroke: 18, label: 'Recovery', sub: rec == null ? 'wear overnight' : (hrvSub || null) })}
+      ${ring({ value: baselineReady ? rec : null, max: 100, color: recCol, size: 230, stroke: 18, label: 'Recovery',
+               sub: baselineReady ? (hrvSub || null) : (hrvSub || 'wear overnight') })}
       ${plan ? `<div class="plan" style="--plan:${plan.color}">
           <div class="plan-label">${esc(plan.label)}</div>
           <div class="plan-target">Target strain ${plan.strainRange[0]}–${plan.strainRange[1]}</div>
-        </div>` : ''}
+        </div>`
+        : `<div class="plan" style="--plan:#46d8ff">
+          <div class="plan-label">Building your baseline</div>
+          <div class="plan-target">Recovery unlocks after ~3 nights</div>
+        </div>`}
     </section>
 
     <section class="ring-pair">
