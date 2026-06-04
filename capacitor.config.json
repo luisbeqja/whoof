@@ -1,6 +1,6 @@
 {
   "appId": "dev.getwhoof.app",
-  "appName": "whoof",
+  "appName": "Whool",
   "webDir": "web",
   "ios": {
     "contentInset": "always",
@@ -12,6 +12,11 @@
   "plugins": {
     "CapacitorHttp": {
       "enabled": true
+    },
+    "StatusBar": {
+      "overlaysWebView": true,
+      "style": "DARK",
+      "backgroundColor": "#00000000"
     },
     "BluetoothLe": {
       "displayStrings": {

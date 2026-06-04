@@ -11,13 +11,16 @@ import { recentDailyMetrics } from '../data/queries.js';
 import { dailyPlan } from '../metrics/plan.js';
 import { localDateKey } from '../util/time.js';
 
+// Metric colours come from CSS custom properties (see mobile.css) so they adapt
+// to the light/dark theme — these var() references resolve in both inline
+// styles and SVG stroke attributes.
 const COLORS = {
-  recHigh: '#c8ff3d',   // lime — strong recovery
-  recMid: '#ffc44d',
-  recLow: '#ff5a6a',
-  strain: '#46d8ff',
-  sleep: '#7e8bff',
-  track: 'rgba(255,255,255,0.07)',
+  recHigh: 'var(--rec-high)',   // lime — strong recovery
+  recMid: 'var(--rec-mid)',
+  recLow: 'var(--rec-low)',
+  strain: 'var(--m-strain)',
+  sleep: 'var(--m-sleep)',
+  track: 'var(--track)',
 };
 
 function recoveryColor(v) {

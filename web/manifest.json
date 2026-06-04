@@ -1,6 +1,6 @@
 {
-  "name": "whoof",
-  "short_name": "whoof",
+  "name": "Whool",
+  "short_name": "Whool",
   "description": "Unofficial, educational dashboard for the WHOOP 4.0 strap. Reads sensor data locally over Bluetooth; runs entirely in your browser. Not affiliated with WHOOP, Inc.",
   "start_url": "/",
   "scope": "/",

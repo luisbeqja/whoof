@@ -3,6 +3,7 @@
 // stored only in this device's localStorage (see coach-client.js).
 
 import { getApiKey, setApiKey, clearApiKey, getModel, setModel, hasApiKey, MODELS } from './coach-client.js';
+import { getTheme, setTheme } from './theme.js';
 
 let root = null;
 let onChange = () => {};
@@ -20,6 +21,12 @@ export function mountSettings(container, opts = {}) {
       <div class="settings-head">
         <span>Settings</span>
         <button id="set-close" aria-label="Close">✕</button>
+      </div>
+
+      <span class="set-label">Appearance</span>
+      <div class="theme-toggle" role="group" aria-label="Appearance">
+        <button type="button" class="theme-opt" data-theme="dark">🌙 Dark</button>
+        <button type="button" class="theme-opt" data-theme="light">☀️ Light</button>
       </div>
 
       <label class="set-label" for="set-key">Anthropic API key</label>
@@ -47,6 +54,13 @@ export function mountSettings(container, opts = {}) {
   const modelSel = root.querySelector('#set-model');
   const status = root.querySelector('#set-status');
 
+  // Appearance toggle — applies immediately (live preview) and persists.
+  const themeOpts = root.querySelectorAll('.theme-opt');
+  themeOpts.forEach((btn) => btn.addEventListener('click', () => {
+    setTheme(btn.dataset.theme);
+    syncThemeButtons();
+  }));
+
   root.querySelector('#set-reveal').addEventListener('click', () => {
     keyInput.type = keyInput.type === 'password' ? 'text' : 'password';
   });
@@ -58,7 +72,7 @@ export function mountSettings(container, opts = {}) {
     if (v) setApiKey(v);
     setModel(modelSel.value);
     status.textContent = v ? 'Saved ✓' : 'Model saved (no key set)';
-    status.style.color = 'var(--lime)';
+    status.style.color = 'var(--accent)';
     onChange();
     setTimeout(close, 600);
   });
@@ -72,8 +86,16 @@ export function mountSettings(container, opts = {}) {
   });
 }
 
+function syncThemeButtons() {
+  if (!root) return;
+  const current = getTheme();
+  root.querySelectorAll('.theme-opt').forEach((btn) =>
+    btn.classList.toggle('active', btn.dataset.theme === current));
+}
+
 export function openSettings() {
   if (!root) return;
+  syncThemeButtons();
   // Show the stored key masked-but-present so the user knows one is set,
   // without us re-displaying the secret in full unless they reveal it.
   const k = getApiKey();

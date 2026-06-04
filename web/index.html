@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-<title>whoof</title>
+<title>Whool</title>
 <link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#0a0b0d" />
 <meta name="color-scheme" content="dark" />
@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="whoof" />
+<meta name="apple-mobile-web-app-title" content="Whool" />
 <meta name="format-detection" content="telephone=no" />
 
 <link rel="apple-touch-icon" href="/icons/icon-180.png" />
@@ -27,6 +27,22 @@
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"></noscript>
 <link rel="stylesheet" href="/mobile.css" />
+
+<!-- Apply the saved light/dark theme before first paint to avoid a flash.
+     Keep the storage key + colours in sync with js/mobile/theme.js. -->
+<script>
+  (function () {
+    try {
+      if (localStorage.getItem('whoof.theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', '#f6f7f4');
+        var c = document.querySelector('meta[name="color-scheme"]');
+        if (c) c.setAttribute('content', 'light');
+      }
+    } catch (e) { /* default dark */ }
+  })();
+</script>
 </head>
 <body>
 <main id="app">
