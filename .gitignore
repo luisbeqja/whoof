@@ -26,3 +26,6 @@ ios/DerivedData/
 *.xcuserstate
 xcuserdata/
 android/
+
+# Debug APK build artifact (sideload build)
+*.apk

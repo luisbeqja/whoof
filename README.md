@@ -39,6 +39,25 @@ Cloudflare's CDN. No install, no signup; pair your own strap over BLE
 | **iPhone — happy to keep a Mac around as the hub** | [docs/IPHONE.md](docs/IPHONE.md) — install the PWA from Safari, pair on Mac, JSON export/import | Free, no developer account | 5 min |
 | **Mac Chrome, day-to-day dev** | Read on below | Free | 30 sec |
 | **iPhone — want a polished native-app feel and have Xcode** | See the [`ios-app` branch](../../tree/ios-app) — Capacitor wrap, free Apple-ID signing | Free but re-sign in Xcode every 7 days | 15 min |
+| **Android — native app, pair the strap over BLE from the phone** | **[docs/native-android.md](docs/native-android.md)** — Capacitor wrap + Android Studio | Free | 15 min |
+
+---
+
+## The app: clean Home + AI Coach
+
+Opening the app lands on a **minimal, glanceable Home** — recovery / strain / sleep
+rings and your key stats, styled for the phone — plus a **Coach** tab: a chat
+agent (powered by Claude) that has your *full* WHOOP history, not just today's
+numbers. Ask "how am I recovering this week?" or "should I train hard today?" and
+it answers from your actual data.
+
+The detailed multi-tab dashboard (recovery / sleep / strain / trends / live) is
+still there at **`/dashboard.html`**, linked from the bottom of Home.
+
+> The Coach is a Cloudflare Pages Function (`functions/api/coach.js`) calling the
+> Anthropic API. Set one secret to enable it:
+> `npx wrangler pages secret put ANTHROPIC_API_KEY` then `npm run deploy`.
+> Without it, everything else (BLE, metrics, Home) still works.
 
 ---
 

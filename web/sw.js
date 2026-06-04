@@ -5,11 +5,16 @@
 
 // Bump this version any time the caching strategy or precache list changes
 // so old caches are pruned on activate.
-const CACHE_NAME = 'whoof-v7';
+const CACHE_NAME = 'whoof-v8';
 
-// Assets to pre-cache on install. Paths are relative to SW scope (/)
+// Assets to pre-cache on install. Paths are relative to SW scope (/).
+// The new minimal app shell is '/' + mobile.css + the mobile/app.js entry; the
+// rest of the ES-module graph is cached on first load by the network-first
+// handler below. styles.css + vendor remain for the legacy dashboard.html.
 const PRECACHE = [
   '/',
+  '/mobile.css',
+  '/js/mobile/app.js',
   '/styles.css',
   '/vendor/chart.umd.min.js',
   '/vendor/idb.min.js',

@@ -7,8 +7,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
-  "theme_color": "#07070A",
-  "background_color": "#07070A",
+  "theme_color": "#0a0b0d",
+  "background_color": "#0a0b0d",
   "categories": ["health", "fitness", "lifestyle"],
   "lang": "en",
   "dir": "ltr",
@@ -41,14 +41,9 @@
   "screenshots": [],
   "shortcuts": [
     {
-      "name": "Overview",
-      "url": "/#overview",
-      "description": "Today's recovery, strain and sleep at a glance"
-    },
-    {
-      "name": "Live",
-      "url": "/#live",
-      "description": "Live heart rate and HRV"
+      "name": "Full dashboard",
+      "url": "/dashboard.html",
+      "description": "The detailed recovery / sleep / strain / trends dashboard"
     }
   ]
 }
