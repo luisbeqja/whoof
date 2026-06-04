@@ -52,12 +52,30 @@ async function boot() {
   show('home');
   strap.autoConnect();
 
-  // Reconnect when the app returns to the foreground. Android usually keeps the
-  // app in memory, so reopening it resumes (rather than relaunches) — without
-  // this, a strap that dropped while backgrounded would sit disconnected.
-  // autoConnect() self-guards against running while already connected.
+  // Foreground/background handling.
+  //
+  // A WebView app can't keep BLE running while the phone is asleep — Android
+  // suspends the web layer and notifications stop. Worse, if the GATT link
+  // *stays* connected while we're suspended, the strap streams live data to a
+  // host that isn't listening (lost) instead of recording to its own flash.
+  //
+  // So: when we go to the background, RELEASE the strap (after a short grace,
+  // so quick app-switches don't churn) — that puts the strap into its own
+  // continuous flash-recording mode. When we come back, RECONNECT, which runs
+  // the historical backfill and pulls everything recorded while we were away
+  // (e.g. overnight sleep). autoConnect() self-guards against double-connects.
+  let bgReleaseTimer = null;
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') strap.autoConnect();
+    if (document.visibilityState === 'visible') {
+      if (bgReleaseTimer) { clearTimeout(bgReleaseTimer); bgReleaseTimer = null; }
+      strap.autoConnect();
+    } else {
+      if (bgReleaseTimer) clearTimeout(bgReleaseTimer);
+      bgReleaseTimer = setTimeout(() => {
+        bgReleaseTimer = null;
+        if (strap.isConnected()) strap.disconnect().catch(() => {});
+      }, 20000);
+    }
   });
 }
 
