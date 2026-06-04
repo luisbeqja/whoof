@@ -4,9 +4,15 @@
   "webDir": "web",
   "ios": {
     "contentInset": "always",
-    "backgroundColor": "#0b0e14"
+    "backgroundColor": "#0a0b0d"
+  },
+  "android": {
+    "backgroundColor": "#0a0b0d"
   },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "BluetoothLe": {
       "displayStrings": {
         "scanning": "Scanning for your WHOOP…",

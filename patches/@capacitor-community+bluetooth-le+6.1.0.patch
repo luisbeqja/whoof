@@ -1,0 +1,37 @@
+diff --git a/node_modules/@capacitor-community/bluetooth-le/android/src/main/java/com/capacitorjs/community/plugins/bluetoothle/Device.kt b/node_modules/@capacitor-community/bluetooth-le/android/src/main/java/com/capacitorjs/community/plugins/bluetoothle/Device.kt
+index f09e6a0..065b63a 100644
+--- a/node_modules/@capacitor-community/bluetooth-le/android/src/main/java/com/capacitorjs/community/plugins/bluetoothle/Device.kt
++++ b/node_modules/@capacitor-community/bluetooth-le/android/src/main/java/com/capacitorjs/community/plugins/bluetoothle/Device.kt
+@@ -309,11 +309,17 @@ class Device(
+         }
+         bluetoothGatt?.close()
+         connectionState = STATE_CONNECTING
++        // autoConnect=true (whoof patch): WHOOP straps advertise with a rotating
++        // random BLE address and sleep aggressively, so a direct connect
++        // (autoConnect=false) fails on Android with status 133
++        // (GATT_CONN_FAILED_ESTABLISHMENT). autoConnect=true puts the device on
++        // the acceptlist and connects when it next advertises — reliable for
++        // random-address peripherals. Persisted via patch-package.
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+             initializeCallbacksHandlerThread()
+             bluetoothGatt = device.connectGatt(
+                 context,
+-                false,
++                true,
+                 gattCallback,
+                 BluetoothDevice.TRANSPORT_LE,
+                 BluetoothDevice.PHY_OPTION_NO_PREFERRED,
+@@ -321,11 +327,11 @@ class Device(
+             )
+         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+             bluetoothGatt = device.connectGatt(
+-                context, false, gattCallback, BluetoothDevice.TRANSPORT_LE
++                context, true, gattCallback, BluetoothDevice.TRANSPORT_LE
+             )
+         } else {
+             bluetoothGatt = device.connectGatt(
+-                context, false, gattCallback
++                context, true, gattCallback
+             )
+         }
+         setConnectionTimeout(key, "Connection timeout.", bluetoothGatt, timeout)
