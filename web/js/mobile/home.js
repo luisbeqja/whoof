@@ -114,13 +114,12 @@ async function render() {
   const today = latestUsable(metrics);
 
   const connected = strap.state.status === 'connected';
-  const pill = connectionPill();
 
   if (!today) {
     root.innerHTML = `
       <header class="home-head">
         <div><div class="hello">${greeting()}</div><div class="subtitle">Let's see your day</div></div>
-        ${pill}
+        ${headActions()}
       </header>
       <div class="empty-hero">
         <div class="empty-ring">${ring({ value: null, max: 100, color: COLORS.track, size: 220, label: 'Recovery' })}</div>
@@ -164,7 +163,7 @@ async function render() {
         <div class="hello">${greeting()}</div>
         <div class="subtitle">${esc(relDate(today.date))}</div>
       </div>
-      ${pill}
+      ${headActions()}
     </header>
 
     <section class="hero-card">
@@ -208,6 +207,21 @@ async function render() {
   root.querySelector('#home-coach')?.addEventListener('click', () => onOpenChat());
 }
 
+const SYNC_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>';
+
+// Pill + (when connected) a "Sync now" button to re-pull buffered data from the
+// strap's flash on demand. Wrapped in one container so updateLive() can swap
+// the whole thing as the connection state changes.
+function actionsInner() {
+  const sync = strap.state.status === 'connected'
+    ? `<button class="sync-btn" id="home-sync" aria-label="Sync now" title="Sync now">${SYNC_ICON}</button>`
+    : '';
+  return connectionPill() + sync;
+}
+function headActions() {
+  return `<div class="head-actions" id="home-actions">${actionsInner()}</div>`;
+}
+
 function connectionPill() {
   const s = strap.state;
   if (s.status === 'connected') {
@@ -230,17 +244,18 @@ function wirePill() {
   };
   root.querySelector('#home-pill')?.addEventListener('click', handler);
   root.querySelector('#home-connect')?.addEventListener('click', () => strap.connect());
+  root.querySelector('#home-sync')?.addEventListener('click', () => strap.syncNow());
 }
 
 // Update just the live bits (HR, pill) without a full re-render, to keep the
 // rings from flickering while streaming.
 function updateLive() {
   if (!root) return;
-  const pill = root.querySelector('#home-pill');
-  if (pill) {
-    const fresh = document.createElement('div');
-    fresh.innerHTML = connectionPill();
-    pill.replaceWith(fresh.firstElementChild);
+  const actions = root.querySelector('#home-actions');
+  if (actions) {
+    // Re-render pill + sync button so the sync button appears/disappears with
+    // the connection state.
+    actions.innerHTML = actionsInner();
     wirePill();
   }
   // live HR tile (first tile) — only when connected & streaming
