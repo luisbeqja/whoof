@@ -7,6 +7,7 @@ import * as strap from './strap.js';
 import { mountHome } from './home.js';
 import { mountChat, openChat } from './chat.js';
 import { mountSettings } from './settings.js';
+import { applyTheme, getTheme } from './theme.js';
 
 const isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 // In the Capacitor shell the origin is localhost, so the coach must be called
@@ -26,6 +27,10 @@ function show(screen) {
 }
 
 async function boot() {
+  // Apply the saved light/dark choice (the inline script in index.html already
+  // set the attribute pre-paint; this also syncs the theme-color meta).
+  applyTheme(getTheme());
+
   // Install the Web-Bluetooth→native bridge before anything touches
   // navigator.bluetooth (native shell only; no-op on the web).
   if (isNative) {

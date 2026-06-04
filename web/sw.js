@@ -5,7 +5,7 @@
 
 // Bump this version any time the caching strategy or precache list changes
 // so old caches are pruned on activate.
-const CACHE_NAME = 'whoof-v8';
+const CACHE_NAME = 'whoof-v10';
 
 // Assets to pre-cache on install. Paths are relative to SW scope (/).
 // The new minimal app shell is '/' + mobile.css + the mobile/app.js entry; the

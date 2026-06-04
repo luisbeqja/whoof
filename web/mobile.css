@@ -25,6 +25,22 @@
   --red:       #ff5a6a;
   --amber:     #ffc44d;
 
+  /* Accent used for text / borders / icons. Stays equal to --lime on the dark
+     theme; the light theme swaps in a deeper green that reads on white. */
+  --accent:    var(--lime);
+
+  /* Metric colours (recovery / strain / sleep rings + ring track). Defined here
+     so the light theme can deepen them for contrast — home.js references these
+     via var(). */
+  --rec-high:  #c8ff3d;
+  --rec-mid:   #ffc44d;
+  --rec-low:   #ff5a6a;
+  --m-strain:  #46d8ff;
+  --m-sleep:   #7e8bff;
+  --track:     rgba(255,255,255,0.07);
+
+  --scrim:     rgba(4,5,7,0.6);
+
   --radius:    26px;
   --radius-sm: 16px;
 
@@ -33,6 +49,35 @@
 
   --sa-top:    env(safe-area-inset-top, 0px);
   --sa-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- Light theme ----------
+   Soft off-white canvas, white cards. --lime stays bright (it's only ever a
+   fill with near-black text on top), while --accent and the metric colours go
+   deeper so they read on a light background. */
+:root[data-theme="light"] {
+  --bg:        #f6f7f4;
+  --bg-2:      #eef0ea;
+  --card:      #ffffff;
+  --card-2:    #f2f4f6;
+  --border:    rgba(17,20,24,0.10);
+  --border-hi: rgba(17,20,24,0.18);
+
+  --text:      #16181c;
+  --text-2:    #41454d;
+  --muted:     #6b7280;
+  --faint:     #9aa0aa;
+
+  --accent:    #4d8a00;
+
+  --rec-high:  #4d8a00;
+  --rec-mid:   #c4860a;
+  --rec-low:   #e23a4a;
+  --m-strain:  #0a93c4;
+  --m-sleep:   #5560e0;
+  --track:     rgba(17,20,24,0.08);
+
+  --scrim:     rgba(20,22,26,0.34);
 }
 
 * , *::before, *::after { box-sizing: border-box; }
@@ -81,7 +126,7 @@ svg { display: block; }
   border: 1px solid var(--border-hi);
 }
 .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.pill-on  { color: var(--lime); background: rgba(200,255,61,0.10); border-color: rgba(200,255,61,0.35); }
+.pill-on  { color: var(--accent); background: rgba(200,255,61,0.10); border-color: rgba(200,255,61,0.35); }
 .pill-busy{ color: var(--amber); background: rgba(255,196,77,0.10); border-color: rgba(255,196,77,0.30); }
 .pill-off { color: #0c0f06; background: var(--lime); border-color: var(--lime); }
 
@@ -153,7 +198,7 @@ svg { display: block; }
 }
 .coach-cta strong { font-size: 15px; }
 .coach-cta-sub { color: var(--muted); font-size: 12.5px; }
-.coach-cta-arrow { margin-left: auto; color: var(--lime); font-size: 20px; }
+.coach-cta-arrow { margin-left: auto; color: var(--accent); font-size: 20px; }
 
 .dash-link {
   display: block; text-align: center; margin-top: 22px;
@@ -191,7 +236,7 @@ svg { display: block; }
   padding: 8px 0; color: var(--muted); font-size: 11px; font-weight: 600;
 }
 .nav-item svg { width: 23px; height: 23px; }
-.nav-item.active { color: var(--lime); }
+.nav-item.active { color: var(--accent); }
 body.chat-open .bottom-nav { display: none; }
 
 /* ---------- Chat ---------- */
@@ -205,10 +250,10 @@ body.chat-open .bottom-nav { display: none; }
 }
 .chat-back { width: 32px; height: 32px; font-size: 22px; color: var(--text-2); }
 .chat-gear { width: 32px; height: 32px; font-size: 19px; color: var(--text-2); }
-.chat-gear:hover { color: var(--lime); }
+.chat-gear:hover { color: var(--accent); }
 .chat-title { font-family: var(--display); font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 8px; }
 .coach-dot, .coach-cta-icon { line-height: 1; }
-.chat-title .coach-dot { color: var(--lime); }
+.chat-title .coach-dot { color: var(--accent); }
 
 .chat-log { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; }
 .bubble {
@@ -224,7 +269,7 @@ body.chat-open .bottom-nav { display: none; }
   border: 1px solid var(--border-hi); border-radius: 999px;
   padding: 9px 14px; font-size: 13px; color: var(--text-2); background: var(--card);
 }
-.chip:hover { border-color: var(--lime); color: var(--lime); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
 
 .chat-bar {
   display: flex; gap: 9px; align-items: center;
@@ -236,7 +281,7 @@ body.chat-open .bottom-nav { display: none; }
   border-radius: 999px; padding: 13px 18px; color: var(--text); font-size: 15px;
 }
 #chat-input::placeholder { color: var(--faint); }
-#chat-input:focus { outline: none; border-color: var(--lime); }
+#chat-input:focus { outline: none; border-color: var(--accent); }
 #chat-send {
   flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%;
   background: var(--lime); color: #0c0f06; font-size: 21px; font-weight: 700;
@@ -251,7 +296,7 @@ body.chat-open .bottom-nav { display: none; }
 .settings-overlay {
   position: fixed; inset: 0; z-index: 60; display: none;
   align-items: flex-end; justify-content: center;
-  background: rgba(4,5,7,0.6);
+  background: var(--scrim);
 }
 .settings-overlay.open { display: flex; }
 .settings-sheet {
@@ -271,7 +316,7 @@ body.chat-open .bottom-nav { display: none; }
   flex: 1; background: var(--card-2); border: 1px solid var(--border-hi); border-radius: 12px;
   padding: 12px 14px; color: var(--text); font-size: 15px; font-family: var(--font-mono, monospace);
 }
-#set-key:focus { outline: none; border-color: var(--lime); }
+#set-key:focus { outline: none; border-color: var(--accent); }
 #set-reveal { width: 46px; border: 1px solid var(--border-hi); border-radius: 12px; background: var(--card-2); font-size: 16px; }
 .set-note { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 8px 2px 0; }
 #set-model {
@@ -282,3 +327,17 @@ body.chat-open .bottom-nav { display: none; }
 .settings-actions .btn-primary { flex: 1; padding: 13px; border-radius: 999px; }
 .btn-ghost { flex: 1; padding: 13px; border-radius: 999px; background: var(--card-2); border: 1px solid var(--border-hi); color: var(--text-2); font-weight: 600; }
 .set-status { text-align: center; font-size: 13px; color: var(--muted); margin-top: 12px; min-height: 16px; }
+
+/* appearance (light / dark) segmented control */
+.theme-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  background: var(--card-2); border: 1px solid var(--border-hi);
+  border-radius: 999px; padding: 4px;
+}
+.theme-opt {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 12px; border-radius: 999px;
+  font-size: 14px; font-weight: 600; color: var(--muted);
+  transition: background .15s ease, color .15s ease;
+}
+.theme-opt.active { background: var(--lime); color: #0c0f06; }
